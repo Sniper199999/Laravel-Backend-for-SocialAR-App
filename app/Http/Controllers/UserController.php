@@ -16,6 +16,8 @@ use Carbon\Carbon;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use \Illuminate\Support\Facades\DB;
 use \Illuminate\Support\Arr;
+use Faker\Generator;
+use Illuminate\Container\Container;
 
 class UserController extends Controller
 {
@@ -245,5 +247,30 @@ class UserController extends Controller
                 array('km1' => $km, 'km2' => $km, 'km3' => $km, 'km4' => $km, 'lat1' => $lat, 'lng1' => $lng, 'lat2' => $lat, 'lng2' => $lng,)
                 );
         return $myData;
+    }
+
+    public function insertdata(Request $request)
+    {
+        if (($handle = fopen ( public_path () . '/FOF_dp_asc.csv', 'r' )) !== FALSE) {
+            //$faker = Faker\Factory::create();
+            set_time_limit(10800);
+            $faker = Container::getInstance()->make(Generator::class);
+            while ( ($data = fgetcsv ( $handle, 1000, ',' )) !== FALSE ) {
+                $csv_data = new User ();
+                $csv_data->id = $data [0];
+                $csv_data->username = $data [1];
+                $csv_data->name = $faker->name();
+                $csv_data->email = $faker->unique()->safeEmail();
+                $csv_data->email_verified_at = now();
+                $csv_data->password = bcrypt('password');
+                $csv_data->user_dp = $data [2];
+                $csv_data->user_location = DB::raw("PointFromText('POINT(140.7484404 -73.9878441)')");
+                $csv_data->user_avatar = $faker->biasedNumberBetween(0,5);
+                $csv_data->active = $faker->biasedNumberBetween(0,1);
+                $csv_data->save ();
+            }
+            fclose ( $handle );
+        }
+        return "Done";
     }
 }

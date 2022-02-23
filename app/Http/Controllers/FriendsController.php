@@ -82,4 +82,21 @@ class FriendsController extends Controller
     {
         //
     }
+
+    public function insertfof(Request $request)
+    {
+        if (($handle = fopen ( public_path () . '/FOF_final_without_duplicates.csv', 'r' )) !== FALSE) {
+            //$faker = Faker\Factory::create();
+            set_time_limit(10800);
+            #$faker = Container::getInstance()->make(Generator::class);
+            while ( ($data = fgetcsv ( $handle, 1000, ',' )) !== FALSE ) {
+                $csv_data = new Friends ();
+                $csv_data->user_id = $data [0];
+                $csv_data->friend_id = $data [1];
+                $csv_data->save ();
+            }
+            fclose ( $handle );
+        }
+        return "Done";
+    }
 }

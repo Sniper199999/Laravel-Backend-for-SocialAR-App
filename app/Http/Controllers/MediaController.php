@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
-
+use Illuminate\Support\Facades\Http;
 
 class MediaController extends Controller
 {
@@ -124,7 +124,7 @@ class MediaController extends Controller
     //     return $data;
     // }
 
-
+    
 
     public function UploadImg(Request $request) {
         $fields = $request->validate([
@@ -192,5 +192,12 @@ class MediaController extends Controller
        // $candidates = $party->medias; // Returns a Laravel Collection
         return;
     }
+
+    public function flask(Request $request){
+        $user_id = $request->input('user_id');
+        $response = Http::get('http://127.0.0.1:5000/getFOF');
+        return response($response) ->header('Content-Type', 'application/json');;
+    }
+
 
 }

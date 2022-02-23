@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\CommentsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,12 @@ Route::get('/media', [MediaController::class, 'index']);
 Route::post('/uploadimg', [MediaController::class, 'UploadImg']);
 Route::get('/getusers', [UserController::class, 'nearbyUsers']);
 Route::get('/getcomments', [CommentsController::class, 'getCommentsOnPic']);
+Route::get('/flasktest', [MediaController::class, 'flask']);
+
+//insert main data
+Route::get('/insertdata', [UserController::class, 'insertdata']);
+Route::get('/insertfof', [FriendsController::class, 'insertfof']);
+
 
 
 // Protected routes
