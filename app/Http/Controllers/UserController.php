@@ -262,7 +262,7 @@ class UserController extends Controller
                 $csv_data->name = $faker->name();
                 $csv_data->email = $faker->unique()->safeEmail();
                 $csv_data->email_verified_at = now();
-                $csv_data->password = bcrypt('password');
+                $csv_data->password = bcrypt("password");
                 $csv_data->user_dp = $data [2];
                 $csv_data->user_location = DB::raw("PointFromText('POINT(140.7484404 -73.9878441)')");
                 $csv_data->user_avatar = $faker->biasedNumberBetween(0,5);

@@ -36,6 +36,8 @@ class MediaFactory extends Factory
 
         return [
             'image_path' => $image_url,
+            'width' => 640,
+            'height' => 480,
             'position' => DB::raw("ST_PointFromText('POINT($qwe $qwe1)')"),
             //'position' => DB::raw("PointFromText('POINT(140.7484404 -73.9878441)')"),
             'compass_direction' => $this-> faker->biasedNumberBetween(0,360),

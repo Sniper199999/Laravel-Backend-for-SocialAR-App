@@ -18,6 +18,8 @@ class CreateMediaTable extends Migration
             $table->foreignId('user_id');
             $table->string('caption');
             $table->string('image_path');
+            $table->integer('width');
+            $table->integer('height');
             $table->point('position')->nullable();
             $table->smallInteger('compass_direction');
             $table->integer('total_comments');

@@ -21,6 +21,8 @@ class Media extends Model
         'user_id',
         'caption',
         'image_path',
+        'width',
+        'height',
         'compass_direction',
         'total_comments',
         //'user_loaction',
