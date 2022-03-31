@@ -28,10 +28,14 @@ Route::post('/uploadimg', [MediaController::class, 'UploadImg']);
 Route::get('/getusers', [UserController::class, 'nearbyUsers']);
 Route::get('/getcomments', [CommentsController::class, 'getCommentsOnPic']);
 Route::get('/flasktest', [MediaController::class, 'flask']);
+Route::get('/getmedia', [MediaController::class, 'getMediaa']);
+Route::get('/homepage', [MediaController::class, 'homepage']);
+
 
 //insert main data
 Route::get('/insertdata', [UserController::class, 'insertdata']);
 Route::get('/insertfof', [FriendsController::class, 'insertfof']);
+Route::get('/insertmediadata', [MediaController::class, 'insertmediadata']);
 
 
 
@@ -62,16 +66,51 @@ Route::post('/test', function(Request $request) {
 
 
 Route::get('/test', function(Request $request) {
-    return [
-        [
-            "x" => 123,
-            "y" => 53425
-        ],
-        [
-            "x" => 123,
-            "y" => 789
-        ],
-    ];
+
+    function rand_float($st_num=0,$end_num=1,$mul=1000000)
+        {
+        if ($st_num>$end_num) return false;
+        return mt_rand($st_num*$mul,$end_num*$mul)/$mul;
+        }
+    
+    $loc = array();
+    //Vasai
+    $cood_1 = array(); 
+    $cood_1[] = rand_float(19.364108,19.391966);
+    $cood_1[] = rand_float(72.810590, 72.836317);
+    $loc[] = $cood_1;
+    
+    //Virar
+    $cood_2 = array(); 
+    $cood_2[] = rand_float(19.448449,19.462525);
+    $cood_2[] = rand_float(72.799873, 72.819856);
+    $loc[] = $cood_2;
+
+    //Palghar
+    $cood_3 = array(); 
+    $cood_3[] = rand_float(19.691337,19.715975);
+    $cood_3[] = rand_float(72.762142, 72.793665);
+    $loc[] = $cood_3;
+
+    $random_loc_index = array_rand($loc);
+    $random_location = $loc[$random_loc_index];
+
+    $faker = Faker\Factory::create();
+    $sentence_length = mt_rand(254, 255);
+    $varr = $faker->realText($sentence_length);
+    $tt = $sentence_length . $varr;
+    return $tt;
+    
+    // return [
+    //     [
+    //         "x" => 123,
+    //         "y" => 53425
+    //     ],
+    //     [
+    //         "x" => 123,
+    //         "y" => 789
+    //     ],
+    // ];
 });
 
 //Route::resource('user', UserController::class);

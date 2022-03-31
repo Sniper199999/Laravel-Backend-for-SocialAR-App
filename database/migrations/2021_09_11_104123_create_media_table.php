@@ -21,6 +21,8 @@ class CreateMediaTable extends Migration
             $table->integer('width');
             $table->integer('height');
             $table->point('position')->nullable();
+            $table->string('anchor_id')->nullable();
+            $table->string('anchor_name')->nullable();
             $table->smallInteger('compass_direction');
             $table->integer('total_comments');
             $table->integer('total_likes');

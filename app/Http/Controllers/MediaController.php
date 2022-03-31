@@ -11,6 +11,13 @@ use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Illuminate\Support\Facades\Http;
+use Image;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
+use Illuminate\Container\Container;
+use Faker\Generator;
+
+
 
 class MediaController extends Controller
 {
@@ -143,13 +150,28 @@ class MediaController extends Controller
         //Upload User_DP
         $uploadFolder = 'users_media';
         $image = $request->file('image');
-        $image_uploaded_path = $image->store($uploadFolder, 'public');
+        $randomname = Str::random(40).'.jpg';
+        $image_uploaded_path = $image->storeAs($uploadFolder, $randomname, 'public');
         $image_url = Storage::url($image_uploaded_path);
+
+        $image2_uploaded_path = $request->file('image')->storeAs('blurred_users_media', $randomname, 'public');
+        $image2_url = Storage::url($image2_uploaded_path);
+        
+        $path2 = public_path().'\storage\blurred_users_media\\'.$randomname;
+        $path1 = public_path().'\storage\users_media\\'.$randomname;
+        $image_url = Storage::url($image_uploaded_path);
+        $image2_url = Storage::url($image2_uploaded_path);
+
+        $responze = Http::post('http://127.0.0.1:5000/compressblur', [
+            'path1' => $path1,
+            'path2' => $path2,
+        ]);
         $uploadedImageResponse = array(
             "image_name" => basename($image_uploaded_path),
             "image_url" => Storage::url($image_uploaded_path),
             "mime" => $image->getClientMimeType()
         );
+        
 
         //$position = DB::raw("PointFromText('POINT(140.7484404 -73.9878441)')");
 
@@ -160,6 +182,8 @@ class MediaController extends Controller
             'width' => $fields['width'],
             'height' => $fields['height'],
             'position' => "",
+            'anchor_id' => "",
+            'anchor_name' => "",
             'compass_direction' => $fields['compass_direction'],
             'total_comments' => $fields['total_comments'],
             'total_likes' => $fields['total_likes'],
@@ -204,4 +228,117 @@ class MediaController extends Controller
     }
 
 
+    public function getMediaa(Request $request) {
+        $id = $request->input('id');
+        $friend_id = 112;
+        //$candidates = Media::all();
+         $candidates = Media::query()
+            ->select(DB::raw("IFNULL(unlockeds.friend_id, 112) as friend_id"), DB::raw("IFNULL(unlockeds.media_unlocked, 0) as media_unlocked"), 'media.*')
+            ->leftJoin('unlockeds',function($join) {
+                $join->on('unlockeds.user_id','=','media.user_id')
+                ->on('media.id','=','unlockeds.media_id')
+                ->where('unlockeds.friend_id','=',112);
+            })
+            ->where('media.user_id','=',26)
+            ->orderBy('media.created_at','asc')
+            ->orderBy('media.id','asc')
+            ->get();
+
+        $current_date_time = Carbon::now()->toIso8601String();
+        foreach($candidates as $i){
+             $i->current_time = $current_date_time;
+        }
+        return $candidates;
+    }
+
+    public function homepage(Request $request) {
+        $id = $request->input('id');
+        //$friend_id = 112;
+        //$candidates = Media::all();
+        $candidates = Media::query()
+            ->select('users.user_dp', 'users.username' ,DB::raw("IFNULL(unlockeds.friend_id, '$id') as friend_id"),
+                 DB::raw("IFNULL(unlockeds.media_unlocked, 0) as media_unlocked"),
+                 'media.*')
+            ->leftJoin('unlockeds', function($join) use ($id) {
+                $join->on('unlockeds.user_id','=','media.user_id')
+                ->on('media.id','=','unlockeds.media_id')
+                //->on('unlockeds.friend_id','=', $id);
+                ->where('unlockeds.friend_id','=', $id);
+            })
+            //JOIN users u ON u.id = m.user_id
+            ->join('users', function($join1) {
+                $join1->on('users.id' ,'=', 'media.user_id');
+            })
+            ->whereIn('media.user_id',function ($query) use ($id) {
+                $query->from('friends')
+                    ->select('friends.friend_id')
+                    ->where('friends.user_id','=',$id);
+            })
+            ->orderBy('media.created_at','asc')
+            ->orderBy('media.id','asc')
+            ->get();
+
+        $current_date_time = Carbon::now()->toIso8601String();
+        foreach($candidates as $i){
+             $i->current_time = $current_date_time;
+        }
+        return $candidates;
+    }
+
+    public function insertmediadata(Request $request)
+    {
+        if (($handle = fopen ( public_path () . '/posts_sorted.csv', 'r' )) !== FALSE) {
+            //$faker = Faker\Factory::create();
+            set_time_limit(10800);
+            $faker = Container::getInstance()->make(Generator::class);
+            while ( ($data = fgetcsv ( $handle, 1000, ',' )) !== FALSE ) {
+
+                $loc = array();
+                //Vasai
+                $cood_1 = array(); 
+                $cood_1[] = rand_float(19.364108,19.391966);
+                $cood_1[] = rand_float(72.810590, 72.836317);
+                $loc[] = $cood_1;
+                //Virar
+                $cood_2 = array(); 
+                $cood_2[] = rand_float(19.448449,19.462525);
+                $cood_2[] = rand_float(72.799873, 72.819856);
+                $loc[] = $cood_2;
+                //Palghar
+                $cood_3 = array(); 
+                $cood_3[] = rand_float(19.691337,19.715975);
+                $cood_3[] = rand_float(72.762142, 72.793665);
+                $loc[] = $cood_3;
+
+                $random_loc_index = array_rand($loc);
+                $random_location = $loc[$random_loc_index];
+                $lat = $random_location[0];
+                $lng = $random_location[1];
+
+                $csv_data = new Media ();
+                //$csv_data->id = $data [0];
+                $csv_data->user_id = $data [0];
+                $csv_data->caption = $faker->realText(mt_rand(20, 255));
+                $csv_data->image_path = $data [1];
+                $csv_data->width = $data [2];
+                $csv_data->height = $data [3];
+                $csv_data->position = DB::raw("PointFromText('POINT($lat $lng)')");
+                $csv_data->anchor_id = Null;
+                $csv_data->anchor_name = Null;
+                $csv_data->compass_direction = $faker->biasedNumberBetween(1, 360);
+                $csv_data->total_comments = 0;
+                $csv_data->total_likes = 0;
+                $csv_data->save ();
+            }
+            fclose ( $handle );
+        }
+        return "Done";
+    }
 }
+
+function rand_float($st_num=0,$end_num=1,$mul=1000000)
+        {
+            if ($st_num>$end_num) return false;
+            return mt_rand($st_num*$mul,$end_num*$mul)/$mul;
+        }
+

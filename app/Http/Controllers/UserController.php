@@ -18,6 +18,12 @@ use \Illuminate\Support\Facades\DB;
 use \Illuminate\Support\Arr;
 use Faker\Generator;
 use Illuminate\Container\Container;
+use Image;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\HttpCache\Store;
+use Illuminate\Support\Facades\Http;
+
+//use Intervention\Image\ImageManagerStatic;
 
 class UserController extends Controller
 {
@@ -151,13 +157,21 @@ class UserController extends Controller
         //Upload User_DP
         $uploadFolder = 'users_dp';
         $image = $request->file('user_dp');
-        $image_uploaded_path = $image->store($uploadFolder, 'public');
+        $randomname = Str::random(40).'.jpg';
+        $image_uploaded_path = $request->file('user_dp')->storeAs($uploadFolder, $randomname, 'public');
+        $path1 = public_path().'\storage\users_dp\\'.$randomname;
         $image_url = Storage::url($image_uploaded_path);
+
+       // $images = Image::make($image)->encode("JPG", 90);
+        //Storage::disk('public')->put($image2_uploaded_path, $images);
+
+       
         $uploadedImageResponse = array(
             "image_name" => basename($image_uploaded_path),
             "image_url" => Storage::url($image_uploaded_path),
             "mime" => $image->getClientMimeType()
         );
+
 
         $user_location = DB::raw("PointFromText('POINT(140.7484404 -73.9878441)')");
 
@@ -199,9 +213,15 @@ class UserController extends Controller
         $user = User::where('email', $fields['email'])->first();
 
         // Check password
-        if(!$user || !Hash::check($fields['password'], $user->password)) {
+        if(!$user) {
             return response([
-                'message' => 'Bad creds'
+                'message' => 'Wrong User'
+            ], 401);
+        }
+
+        if(!Hash::check($fields['password'], $user->password)) {
+            return response([
+                'message' => 'Wrong Password'
             ], 401);
         }
 
@@ -226,8 +246,38 @@ class UserController extends Controller
 
     public function getMedia(Request $request) {
         $id = $request->input('id');
+        $friend_id = 112;
         $party = User::find($id);
-        $candidates = $party->medias; // Returns a Laravel Collection
+        //$candidates = $party->medias; // Returns a Laravel Collection User.php
+        
+        // $candidates = DB::select(DB::raw("
+        //                 SELECT IFNULL(s.friend_id, :no1) AS friend_id, IFNULL(s.media_unlocked, 0) AS media_unlocked, m.created_at
+        //                 FROM `media` m LEFT JOIN `unlockeds` s ON s.user_id = m.user_id AND m.id = s.media_id AND s.friend_id = :no2
+        //                 WHERE m.user_id = :no3 
+        //                 ORDER BY m.created_at ASC, m.id"),
+        //         array('no1' => $friend_id, 'no2' => $friend_id, 'no3' => $id,)
+        //         );
+
+        $candidates = DB::table('media')
+            ->select(DB::raw("IFNULL(unlockeds.friend_id, 112) as friend_id"), DB::raw("IFNULL(unlockeds.media_unlocked, 0) as media_unlocked"), $party->medias)
+            ->leftJoin('unlockeds',function($join) {
+                $join->on('unlockeds.user_id','=','media.user_id')
+                ->on('media.id','=','unlockeds.media_id')
+                ->where('unlockeds.friend_id','=',112);
+                })
+            ->where('media.user_id','=',26)
+            ->orderBy('media.created_at','asc')
+            ->orderBy('media.id','asc')
+            ->get();
+
+        $current_date_time = Carbon::now()->toIso8601String();
+        //$merged = array_merge($candidates ,$current_date_time);
+        //$ca = $candidates . $current_date_time;
+        //$candidates->put('current', $current_date_time);
+        //$candidates->push($current_date_time);
+        // foreach($candidates as $i){
+        //     $i->current_time = $current_date_time;
+        // }
         return $candidates;
     }
 

@@ -23,6 +23,8 @@ class Media extends Model
         'image_path',
         'width',
         'height',
+        'anchor_id',
+        'anchor_name',
         'compass_direction',
         'total_comments',
         //'user_loaction',
