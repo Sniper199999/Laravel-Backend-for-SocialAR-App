@@ -29,7 +29,9 @@ Route::get('/getusers', [UserController::class, 'nearbyUsers']);
 Route::get('/getcomments', [CommentsController::class, 'getCommentsOnPic']);
 Route::get('/flasktest', [MediaController::class, 'flask']);
 Route::get('/getmedia', [MediaController::class, 'getMediaa']);
+Route::get('/getmediaofuser', [MediaController::class, 'getmediaofuser']);
 Route::get('/homepage', [MediaController::class, 'homepage']);
+Route::get('/getuserinfo', [MediaController::class, 'getuserinfo']);
 
 
 //insert main data

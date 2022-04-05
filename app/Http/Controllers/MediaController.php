@@ -228,6 +228,62 @@ class MediaController extends Controller
     }
 
 
+    public function getuserinfo(Request $request) {
+        $id = $request->input('id');
+        $friend_id = 112;
+        //$candidates = Media::all();
+        //$party = User::find($id);
+        //$candidates = $party->medias; // Returns a Laravel Collection User.php
+
+        $totalpost = DB::table('media')
+            ->select(DB::raw("count(id) as totalmedia"))
+            ->where('user_id','=',$id)
+            ->get();
+
+        $followers = DB::table('friends')
+            ->select(DB::raw("count(user_id) as followers"))
+            ->where('friend_id','=',$id)
+            ->get();
+
+        $following = DB::table('friends')
+            ->select(DB::raw("count(friend_id) as following"))
+            ->where('user_id','=', $id)
+            ->get();
+
+        $data2 = [];
+        
+        $data2[0] =  [$totalpost[0], $followers[0], $following[0]];
+        
+            
+        
+
+        // $current_date_time = Carbon::now()->toIso8601String();
+        // foreach($candidates as $i){
+        //      $i->current_time = $current_date_time;
+        // }
+        return $data2;
+    }
+
+
+    public function getmediaofuser(Request $request) {
+        $id = $request->input('id');
+        $friend_id = 112;
+        //$candidates = Media::all();
+        //$party = User::find($id);
+        //$candidates = $party->medias; // Returns a Laravel Collection User.php
+         $candidates = Media::query()
+            ->select('media.*', 'users.username', 'users.user_dp')
+            ->join('users','users.id','=','media.user_id')
+            ->where('media.user_id','=',$id)
+            ->get();
+
+        $current_date_time = Carbon::now()->toIso8601String();
+        foreach($candidates as $i){
+             $i->current_time = $current_date_time;
+        }
+        return $candidates;
+    }
+
     public function getMediaa(Request $request) {
         $id = $request->input('id');
         $friend_id = 112;
