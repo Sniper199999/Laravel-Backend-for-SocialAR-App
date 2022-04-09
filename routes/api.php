@@ -32,7 +32,8 @@ Route::get('/getmedia', [MediaController::class, 'getMediaa']);
 Route::get('/getmediaofuser', [MediaController::class, 'getmediaofuser']);
 Route::get('/homepage', [MediaController::class, 'homepage']);
 Route::get('/getuserinfo', [MediaController::class, 'getuserinfo']);
-
+Route::get('/following', [FriendsController::class, 'following']);
+Route::get('/followers', [FriendsController::class, 'followers']);
 
 //insert main data
 Route::get('/insertdata', [UserController::class, 'insertdata']);

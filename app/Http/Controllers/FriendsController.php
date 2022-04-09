@@ -101,6 +101,22 @@ class FriendsController extends Controller
     }
 
 
+    public function followers(Request $request) {
+        $id = $request->input('id');
+        $friend_id = 112;
+        //$candidates = Media::all();
+         $candidates = User::query()
+            ->select('*')
+            ->whereIn('users.id',function ($query) use($id) {
+                $query->from('friends')
+                    ->select('friends.user_id')
+                    ->where('friends.friend_id','=',$id);
+                })
+            ->get();
+        return $candidates;
+    }
+
+
 
     public function insertfof(Request $request)
     {
