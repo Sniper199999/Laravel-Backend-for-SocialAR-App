@@ -341,6 +341,8 @@ class MediaController extends Controller
         return $candidates;
     }
 
+
+
     public function insertmediadata(Request $request)
     {
         if (($handle = fopen ( public_path () . '/posts_sorted.csv', 'r' )) !== FALSE) {

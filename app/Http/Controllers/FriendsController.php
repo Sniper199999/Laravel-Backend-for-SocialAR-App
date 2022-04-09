@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Friends;
 use Illuminate\Http\Request;
+use App\Models\User;
 
 class FriendsController extends Controller
 {
@@ -82,6 +83,24 @@ class FriendsController extends Controller
     {
         //
     }
+
+
+    public function following(Request $request) {
+        $id = $request->input('id');
+        $friend_id = 112;
+        //$candidates = Media::all();
+         $candidates = User::query()
+            ->select('*')
+            ->whereIn('users.id',function ($query) use($id) {
+                $query->from('friends')
+                    ->select('friends.friend_id')
+                    ->where('friends.user_id','=',$id);
+                })
+            ->get();
+        return $candidates;
+    }
+
+
 
     public function insertfof(Request $request)
     {

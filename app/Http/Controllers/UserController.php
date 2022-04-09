@@ -279,6 +279,7 @@ class UserController extends Controller
         return $myData;
     }
 
+   
     public function insertdata(Request $request)
     {
         if (($handle = fopen ( public_path () . '/FOF_dp_asc.csv', 'r' )) !== FALSE) {
