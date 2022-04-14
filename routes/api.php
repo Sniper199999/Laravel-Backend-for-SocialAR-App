@@ -34,6 +34,8 @@ Route::get('/homepage', [MediaController::class, 'homepage']);
 Route::get('/getuserinfo', [MediaController::class, 'getuserinfo']);
 Route::get('/following', [FriendsController::class, 'following']);
 Route::get('/followers', [FriendsController::class, 'followers']);
+Route::get('/updatepass', [UserController::class, 'updatepass']);
+
 
 //insert main data
 Route::get('/insertdata', [UserController::class, 'insertdata']);

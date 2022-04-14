@@ -142,6 +142,16 @@ class UserController extends Controller
         //
     }
 
+    public function updatepass(Request $request){
+        $fields = $request->validate([
+            'id' => 'required| string'
+        ]);
+        //$id = $request->input('id');
+        $user = User::find($fields['id']); // (type one user id here xe:1 or 2)
+        $user->update(['password'=>bcrypt('please')]);
+        return "updated";
+    }
+
     public function register(Request $request) {
         $fields = $request->validate([
             'name' => 'required|string',
@@ -158,12 +168,20 @@ class UserController extends Controller
         $uploadFolder = 'users_dp';
         $image = $request->file('user_dp');
         $randomname = Str::random(40).'.jpg';
-        $image_uploaded_path = $request->file('user_dp')->storeAs($uploadFolder, $randomname, 'public');
-        $path1 = public_path().'\storage\users_dp\\'.$randomname;
+        $image_uploaded_path = $image->storeAs('users_dp_mid', $randomname, 'public');
         $image_url = Storage::url($image_uploaded_path);
 
-       // $images = Image::make($image)->encode("JPG", 90);
-        //Storage::disk('public')->put($image2_uploaded_path, $images);
+        $image2_uploaded_path = $image->storeAs('users_dp_small', $randomname, 'public');
+        $image2_url = Storage::url($image2_uploaded_path);
+
+        $mid_path = public_path().'\storage\users_dp_mid\\'.$randomname;
+        $small_path = public_path().'\storage\users_dp_small\\'.$randomname;
+        
+
+        $responze = Http::post('http://127.0.0.1:5000/userdp_compress', [
+            'mid_img' => $mid_path,
+            'small_img' => $small_path,
+        ]);
 
        
         $uploadedImageResponse = array(
@@ -221,7 +239,10 @@ class UserController extends Controller
 
         if(!Hash::check($fields['password'], $user->password)) {
             return response([
-                'message' => 'Wrong Password'
+                'message' => 'Wrong Password',
+                'Password' => $fields['password'],
+                'email' => $fields['email']
+
             ], 401);
         }
 
@@ -229,7 +250,10 @@ class UserController extends Controller
 
         $response = [
             'user' => $user,
-            'token' => $token
+            'token' => $token,
+
+            'Password' => $fields['password'],
+            'email' => $fields['email']
         ];
 
         return response($response, 201);

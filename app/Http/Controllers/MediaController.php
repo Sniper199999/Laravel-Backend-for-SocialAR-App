@@ -157,14 +157,24 @@ class MediaController extends Controller
         $image2_uploaded_path = $request->file('image')->storeAs('blurred_users_media', $randomname, 'public');
         $image2_url = Storage::url($image2_uploaded_path);
         
-        $path2 = public_path().'\storage\blurred_users_media\\'.$randomname;
-        $path1 = public_path().'\storage\users_media\\'.$randomname;
+        $image3_uploaded_path = $request->file('image')->storeAs('users_media_mid', $randomname, 'public');
+        $image3_url = Storage::url($image3_uploaded_path);
+
+        $image4_uploaded_path = $request->file('image')->storeAs('users_media_small', $randomname, 'public');
+        $image4_url = Storage::url($image4_uploaded_path);
+
+        $blur_path = public_path().'\storage\blurred_users_media\\'.$randomname;
+        $full_media_path = public_path().'\storage\users_media_full\\'.$randomname;
+        $mid_media_path = public_path().'\storage\users_media_mid\\'.$randomname;
+        $small_media_path = public_path().'\storage\users_media_small\\'.$randomname;
         $image_url = Storage::url($image_uploaded_path);
         $image2_url = Storage::url($image2_uploaded_path);
 
-        $responze = Http::post('http://127.0.0.1:5000/compressblur', [
-            'path1' => $path1,
-            'path2' => $path2,
+        $responze = Http::post('http://127.0.0.1:5000/media_compressblur', [
+            'full_img' => $full_media_path,
+            'mid_img' => $mid_media_path,
+            'small_img' => $small_media_path,
+            'blur_img' => $blur_path,
         ]);
         $uploadedImageResponse = array(
             "image_name" => basename($image_uploaded_path),
