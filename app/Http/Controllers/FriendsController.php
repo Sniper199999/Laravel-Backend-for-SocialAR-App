@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Friends;
 use Illuminate\Http\Request;
 use App\Models\User;
+use \Illuminate\Support\Facades\DB;
 
 class FriendsController extends Controller
 {
@@ -116,7 +117,36 @@ class FriendsController extends Controller
         return $candidates;
     }
 
+    public function totalfollowers(Request $request) {
+        $id = $request->input('id');
+         $candidates = Friends::query()
+            ->select(DB::raw("count(user_id) as followers"))
+            ->where('friend_id','=',$id)
+            ->get();
+        return $candidates;
+    }
 
+    public function totalfollowing(Request $request) {
+        $id = $request->input('id');
+         $candidates = Friends::query()
+            ->select(DB::raw("count(friend_id) as following"))
+            ->where('user_id','=',$id)
+            ->get();
+        return $candidates;
+    }
+
+
+    public function isfriend(Request $request)
+    {
+       $id = $request->input('id');
+       $friend_id = $request->input('fid');
+
+        $myData = DB::select(DB::raw("
+                    select exists(SELECT * from friends 
+                    WHERE user_id = :fid And friend_id = :uid) AS present"),
+                    array('uid' => $id, 'fid' => $friend_id,));
+        return $myData;
+    }
 
     public function insertfof(Request $request)
     {

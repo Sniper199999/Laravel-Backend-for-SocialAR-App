@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Friend_request;
 use Illuminate\Http\Request;
+use App\Models\User;
+
 
 class FriendRequestController extends Controller
 {
@@ -81,5 +83,16 @@ class FriendRequestController extends Controller
     public function destroy(Friend_request $friend_request)
     {
         //
+    }
+
+    public function friendreq(Request $request) {
+        $id = $request->input('id');
+        //$candidates = Media::all();
+         $candidates = Friend_request::query()      
+            ->select('users.id', 'users.username', 'users.name', 'users.email', 'users.user_dp')
+            ->leftJoin('users','friend_requests.user_id','=','users.id')
+            ->where('friend_requests.requested_user_id','=',$id)
+            ->get();
+        return $candidates;
     }
 }

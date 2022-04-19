@@ -6,6 +6,7 @@ use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\CommentsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FriendRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +36,12 @@ Route::get('/getuserinfo', [MediaController::class, 'getuserinfo']);
 Route::get('/following', [FriendsController::class, 'following']);
 Route::get('/followers', [FriendsController::class, 'followers']);
 Route::get('/updatepass', [UserController::class, 'updatepass']);
+Route::get('/searchusers', [UserController::class, 'searchusers']);
+Route::get('/friendreq', [FriendRequestController::class, 'friendreq']);
+Route::get('/totalfollowers', [FriendsController::class, 'totalfollowers']);
+Route::get('/totalfollowing', [FriendsController::class, 'totalfollowing']);
+Route::get('/isfriend', [FriendsController::class, 'isfriend']);
+Route::get('/totalposts', [MediaController::class, 'totalposts']);
 
 
 //insert main data

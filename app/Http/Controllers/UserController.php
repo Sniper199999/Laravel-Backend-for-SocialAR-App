@@ -303,6 +303,25 @@ class UserController extends Controller
         return $myData;
     }
 
+
+    public function searchusers(Request $request) {
+        $id = $request->input('id');
+        $letter = $request->input('letter');
+        $input_final = '%'.$letter.'%'; 
+        //$candidates = Media::all();
+         $candidates = DB::table('users')     
+            ->select('users.id', 'username', 'users.name as fullname', 'email', 'user_dp', 
+                DB::raw("IFNULL(friends.user_id, 0) as following"))
+            ->leftJoin('friends',function($join) use($id) {
+                $join->on('users.id','=','friends.friend_id')
+                ->where('friends.user_id','=',$id);
+            })
+            ->Where('users.name','like',$input_final)
+            ->orwhere('users.username','like',$input_final)
+            ->get();
+        return $candidates;
+    }
+
    
     public function insertdata(Request $request)
     {

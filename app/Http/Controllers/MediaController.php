@@ -28,19 +28,22 @@ class MediaController extends Controller
      */
     public function index(Request $request)
     {
-       $lat = $request->input('lat');
-       $lng = $request->input('lng');
-       $range = 150;
-       $km = $range/1000;
+        $id = $request->input('id');
+        $lat = $request->input('lat');
+        $lng = $request->input('lng');
+        $range = 600;
+        $km = $range/1000;
 
-        $myData = DB::select(DB::raw("
-                select id, user_id, caption, image_path, st_x(position) lat, st_y(position) lng, compass_direction, total_comments, total_likes 
-                from `media` 
-                where st_contains(st_makeEnvelope(point((:lat1 + :km1 / 111),(:lng1 + :km2 / 111)),
-                                                  point((:lat2 - :km3 / 111),(:lng2 - :km4 / 111))), position)"),
-                array('km1' => $km, 'km2' => $km, 'km3' => $km, 'km4' => $km, 'lat1' => $lat, 'lng1' => $lng, 'lat2' => $lat, 'lng2' => $lng,)
-                );
-        return $myData;
+            $myData = DB::select(DB::raw("
+                    select m.id, user_id, caption, image_path, u.user_dp, st_x(position) lat, st_y(position) lng, compass_direction, total_comments, total_likes 
+                    from media m 
+                    LEFT JOIN users u ON m.user_id = u.id 
+                    where user_id IN (SELECT user_id FROM friends WHERE friend_id = :id)  
+                    and st_contains(st_makeEnvelope(point((:lat1 + :km1 / 111),(:lng1 + :km2 / 111)),
+                                                    point((:lat2 - :km3 / 111),(:lng2 - :km4 / 111))), position)"),
+                    array('id' => $id, 'km1' => $km, 'km2' => $km, 'km3' => $km, 'km4' => $km, 'lat1' => $lat, 'lng1' => $lng, 'lat2' => $lat, 'lng2' => $lng,)
+                    );
+            return $myData;
     }
 
     /**
@@ -322,7 +325,7 @@ class MediaController extends Controller
         //$friend_id = 112;
         //$candidates = Media::all();
         $candidates = Media::query()
-            ->select('users.user_dp', 'users.username' ,DB::raw("IFNULL(unlockeds.friend_id, '$id') as friend_id"),
+            ->select('users.user_dp', 'users.username', DB::raw("users.name as fullname") ,DB::raw("IFNULL(unlockeds.friend_id, '$id') as friend_id"),
                  DB::raw("IFNULL(unlockeds.media_unlocked, 0) as media_unlocked"),
                  'media.*')
             ->leftJoin('unlockeds', function($join) use ($id) {
@@ -351,7 +354,14 @@ class MediaController extends Controller
         return $candidates;
     }
 
-
+    public function totalposts(Request $request) {
+        $id = $request->input('id');
+         $candidates = Media::query()
+            ->select(DB::raw("COUNT(id) as totalmedia"))
+            ->where('user_id','=',$id)
+            ->get();
+        return $candidates;
+    }
 
     public function insertmediadata(Request $request)
     {
