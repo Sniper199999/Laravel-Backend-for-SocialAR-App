@@ -78,6 +78,7 @@ class MediaFactory extends Factory
             'total_likes' => $this->faker->randomDigitNotNull(),
             //'caption' => $this->faker->name(),
             'caption' => $this->faker->realText(mt_rand(20, 500)),
+            'ref_img' => "",
 
         ];
     }

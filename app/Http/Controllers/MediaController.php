@@ -35,10 +35,10 @@ class MediaController extends Controller
         $km = $range/1000;
 
             $myData = DB::select(DB::raw("
-                    select m.id, user_id, caption, image_path, u.user_dp, st_x(position) lat, st_y(position) lng, compass_direction, total_comments, total_likes 
+                    select m.id, user_id, caption, image_path, u.user_dp, st_x(position) lat, st_y(position) lng, compass_direction, total_comments, total_likes, anchor_id, ref_img 
                     from media m 
                     LEFT JOIN users u ON m.user_id = u.id 
-                    where user_id IN (SELECT user_id FROM friends WHERE friend_id = :id)  
+                    where user_id IN (SELECT friend_id FROM friends WHERE user_id = :id)
                     and st_contains(st_makeEnvelope(point((:lat1 + :km1 / 111),(:lng1 + :km2 / 111)),
                                                     point((:lat2 - :km3 / 111),(:lng2 - :km4 / 111))), position)"),
                     array('id' => $id, 'km1' => $km, 'km2' => $km, 'km3' => $km, 'km4' => $km, 'lat1' => $lat, 'lng1' => $lng, 'lat2' => $lat, 'lng2' => $lng,)
@@ -145,17 +145,21 @@ class MediaController extends Controller
             'height' => 'integer',
             'lat' => 'string',
             'lng' => 'string',
+            'anchor_id' => 'string',
+            'anchor_name' => 'string',
             'compass_direction' => 'required|integer',
             'total_comments' => 'integer',
             'total_likes' => 'integer',
+            'ref_img' => 'required|image:jpeg,png,jpg,gif,svg',
         ]);
 
         //Upload User_DP
-        $uploadFolder = 'users_media';
+        $uploadFolder = 'users_media_full';
         $image = $request->file('image');
         $randomname = Str::random(40).'.jpg';
         $image_uploaded_path = $image->storeAs($uploadFolder, $randomname, 'public');
-        $image_url = Storage::url($image_uploaded_path);
+        //$image_url = Storage::url($image_uploaded_path);
+        $image_url = basename($image_uploaded_path);
 
         $image2_uploaded_path = $request->file('image')->storeAs('blurred_users_media', $randomname, 'public');
         $image2_url = Storage::url($image2_uploaded_path);
@@ -170,14 +174,23 @@ class MediaController extends Controller
         $full_media_path = public_path().'\storage\users_media_full\\'.$randomname;
         $mid_media_path = public_path().'\storage\users_media_mid\\'.$randomname;
         $small_media_path = public_path().'\storage\users_media_small\\'.$randomname;
-        $image_url = Storage::url($image_uploaded_path);
+       // $image_url = Storage::url($image_uploaded_path);
         $image2_url = Storage::url($image2_uploaded_path);
+
+        //reference image
+        $RefFolder = 'ref_img';
+        $ref_img = $request->file('ref_img');
+        $ref_randomname = Str::random(40).'.jpg';
+        $ref_img_uploaded_path = $ref_img->storeAs('ref_img', $ref_randomname, 'public');
+        $ref_image_url = basename($ref_img_uploaded_path);
+        $ref_path = public_path().'\storage\ref_img\\'.$ref_randomname;
 
         $responze = Http::post('http://127.0.0.1:5000/media_compressblur', [
             'full_img' => $full_media_path,
             'mid_img' => $mid_media_path,
             'small_img' => $small_media_path,
             'blur_img' => $blur_path,
+            'ref_img' => $ref_path,
         ]);
         $uploadedImageResponse = array(
             "image_name" => basename($image_uploaded_path),
@@ -195,16 +208,17 @@ class MediaController extends Controller
             'width' => $fields['width'],
             'height' => $fields['height'],
             'position' => "",
-            'anchor_id' => "",
-            'anchor_name' => "",
+            'anchor_id' => $fields['anchor_id'],
+            'anchor_name' => Str::random(15),
             'compass_direction' => $fields['compass_direction'],
             'total_comments' => $fields['total_comments'],
             'total_likes' => $fields['total_likes'],
+            'ref_img' => $ref_image_url,
         ]);
 
         $lat = $fields['lat'];
         $lng = $fields['lng'];
-        $point = new Point($lat, $lng);
+        $point = new Point($lng, $lat);
         //$point = new Point(40.7484404, -73.9878441);
         $point->toJson();
         $user_media->position = $point;
@@ -235,9 +249,15 @@ class MediaController extends Controller
     }
 
     public function flask(Request $request){
+        
         $user_id = $request->input('user_id');
-        $response = Http::get('http://127.0.0.1:5000/getFOF');
-        return response($response) ->header('Content-Type', 'application/json');;
+       // $user_id = $request->input('user_id');
+        $response = Http::post('http://127.0.0.1:5000/getFOF',[
+            'user_id' => $user_id,
+        ]);
+       
+        return response($response) ->header('Content-Type', 'application/json');
+      
     }
 
 
@@ -265,8 +285,12 @@ class MediaController extends Controller
 
         $data2 = [];
         
-        $data2[0] =  [$totalpost[0], $followers[0], $following[0]];
-        
+      //  $data2[0] =  [, , ];
+        $data2[0] = [
+            'totalpost' => current($totalpost[0]),
+            'followers' => current($followers[0]),
+            'following' => current($following[0]),
+        ];
             
         
 
@@ -326,13 +350,17 @@ class MediaController extends Controller
         //$candidates = Media::all();
         $candidates = Media::query()
             ->select('users.user_dp', 'users.username', DB::raw("users.name as fullname") ,DB::raw("IFNULL(unlockeds.friend_id, '$id') as friend_id"),
-                 DB::raw("IFNULL(unlockeds.media_unlocked, 0) as media_unlocked"),
+                 DB::raw("IFNULL(unlockeds.media_unlocked, 0) as media_unlocked"), DB::raw("IFNULL(likes.user_id, 0) AS hasuserliked"),
                  'media.*')
             ->leftJoin('unlockeds', function($join) use ($id) {
                 $join->on('unlockeds.user_id','=','media.user_id')
                 ->on('media.id','=','unlockeds.media_id')
                 //->on('unlockeds.friend_id','=', $id);
                 ->where('unlockeds.friend_id','=', $id);
+            })
+            ->leftJoin('likes', function($join) use ($id) {
+                $join->on('media.id','=','likes.media_id')
+                ->where('likes.user_id','=', $id);
             })
             //JOIN users u ON u.id = m.user_id
             ->join('users', function($join1) {
@@ -365,7 +393,7 @@ class MediaController extends Controller
 
     public function insertmediadata(Request $request)
     {
-        if (($handle = fopen ( public_path () . '/posts_sorted.csv', 'r' )) !== FALSE) {
+        if (($handle = fopen ( public_path () . '/posts_sorted2.csv', 'r' )) !== FALSE) {
             //$faker = Faker\Factory::create();
             set_time_limit(10800);
             $faker = Container::getInstance()->make(Generator::class);
@@ -406,6 +434,7 @@ class MediaController extends Controller
                 $csv_data->compass_direction = $faker->biasedNumberBetween(1, 360);
                 $csv_data->total_comments = 0;
                 $csv_data->total_likes = 0;
+                $csv_data->ref_img = Null;
                 $csv_data->save ();
             }
             fclose ( $handle );

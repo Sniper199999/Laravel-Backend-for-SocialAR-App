@@ -26,6 +26,7 @@ class CreateMediaTable extends Migration
             $table->smallInteger('compass_direction');
             $table->integer('total_comments');
             $table->integer('total_likes');
+            $table->string('ref_img')->nullable();
             $table->timestamps();
         });
     }

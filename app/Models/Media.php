@@ -29,6 +29,7 @@ class Media extends Model
         'total_comments',
         //'user_loaction',
         'total_likes',
+        'ref_img',
     ];
 
 
