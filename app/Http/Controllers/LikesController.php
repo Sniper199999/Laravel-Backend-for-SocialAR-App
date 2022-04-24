@@ -82,4 +82,41 @@ class LikesController extends Controller
     {
         //
     }
+
+    public function likemedia(Request $request) {
+
+        $fields = $request->validate([
+            'user_id' => 'required|integer',
+            'media_id' => 'required|integer',
+        ]);
+
+        $Like = Likes::create([
+            'user_id' => $fields['user_id'],
+            'media_id' => $fields['media_id'],
+        ]);
+        $Like->save();
+
+        $response = [
+            '0' => $Like,
+        ];
+
+        return response($response, 201);
+    }
+
+    public function unlike(Request $request) {
+        
+        $user_id = $request->input('user_id');
+        $media_id = $request->input('media_id');
+      
+        $Like = Likes::where([['user_id', '=', $user_id], 
+                        ['media_id', '=', $media_id]])->delete();
+        
+
+        $response = [
+            '0' => "Deleted",
+        ];
+
+        return response($response, 201);
+    }
+
 }

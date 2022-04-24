@@ -8,4 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Unlocked extends Model
 {
     use HasFactory;
+
+
+    protected $fillable = [
+        'user_id',
+        'media_id',
+        'friend_id',
+        'media_unlocked',
+    ];
+
 }

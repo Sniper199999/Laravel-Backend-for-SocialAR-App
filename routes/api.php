@@ -7,6 +7,8 @@ use App\Http\Controllers\CommentsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FriendRequestController;
+use App\Http\Controllers\LikesController;
+use App\Http\Controllers\UnlockedController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +44,13 @@ Route::get('/totalfollowers', [FriendsController::class, 'totalfollowers']);
 Route::get('/totalfollowing', [FriendsController::class, 'totalfollowing']);
 Route::get('/isfriend', [FriendsController::class, 'isfriend']);
 Route::get('/totalposts', [MediaController::class, 'totalposts']);
+Route::post('/likemedia', [LikesController::class, 'likemedia']);
+Route::get('/unlike', [LikesController::class, 'unlike']);
+Route::post('/mediaunlocked', [UnlockedController::class, 'mediaunlocked']);
+Route::get('/removefriend', [FriendsController::class, 'removefriend']);
+Route::post('/addfriend', [FriendsController::class, 'addfriend']);
+Route::get('/sendfriendreq', [FriendRequestController::class, 'sendfriendreq']);
+Route::post('/declinefriendreq', [FriendRequestController::class, 'declinefriendreq']);
 
 
 //insert main data

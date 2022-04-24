@@ -117,6 +117,7 @@ namespace App\Models{
  * @property int $compass_direction
  * @property int $total_comments
  * @property int $total_likes
+ * @property string|null $ref_img
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Comments[] $comments
@@ -151,6 +152,7 @@ namespace App\Models{
  * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|Media whereId($value)
  * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|Media whereImagePath($value)
  * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|Media wherePosition($value)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|Media whereRefImg($value)
  * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|Media whereTotalComments($value)
  * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|Media whereTotalLikes($value)
  * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|Media whereUpdatedAt($value)

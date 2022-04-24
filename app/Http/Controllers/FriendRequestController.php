@@ -95,4 +95,46 @@ class FriendRequestController extends Controller
             ->get();
         return $candidates;
     }
+
+    public function sendfriendreq(Request $request) {
+
+        $fields = $request->validate([
+            'user_id' => 'required|integer',
+            'requested_user_id' => 'required|integer',
+            'status' => 'required|integer',
+        ]);
+
+        $Like = Friend_request::where([['user_id', '=', $fields['user_id']], 
+        ['requested_user_id', '=', $fields['requested_user_id']]])->first();
+
+        if($Like === null){
+            $Like = Friend_request::create([
+                'user_id' => $fields['user_id'],
+                'requested_user_id' => $fields['requested_user_id'],
+                'status' => $fields['status'],
+            ]);
+            $Like->save();
+            $response = [
+                '0' => $Like,
+            ];
+    
+            return response($response, 201);
+        }
+    }
+
+    public function declinefriendreq(Request $request) {
+        
+        $user_id = $request->input('user_id');
+        $requested_user_id = $request->input('requested_user_id');
+      
+        $Like = Friend_request::where([['user_id', '=', $user_id], 
+                        ['requested_user_id', '=', $requested_user_id]])->delete();
+        
+
+        $response = [
+            '0' => "Deleted",
+        ];
+
+        return response($response, 201);
+    }
 }

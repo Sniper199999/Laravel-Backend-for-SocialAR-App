@@ -82,4 +82,36 @@ class UnlockedController extends Controller
     {
         //
     }
+
+
+    public function mediaunlocked(Request $request) {
+
+        $fields = $request->validate([
+            'user_id' => 'required|integer',
+            'media_id' => 'required|integer',
+            'friend_id' => 'required|integer',
+            'media_unlocked' => 'required|integer',
+        ]);
+
+        $Like = Unlocked::where([['media_id', '=', $fields['media_id']], 
+        ['friend_id', '=', $fields['friend_id']]])->first();
+
+        if($Like === null){
+            $Like = Unlocked::create([
+                'user_id' => $fields['user_id'],
+                'media_id' => $fields['media_id'],
+                'friend_id' => $fields['friend_id'],
+                'media_unlocked' => $fields['media_unlocked'],
+            ]);
+            $Like->save();
+        }
+
+        
+
+        $response = [
+            '0' => $Like,
+        ];
+
+        return response($response, 201);
+    }
 }

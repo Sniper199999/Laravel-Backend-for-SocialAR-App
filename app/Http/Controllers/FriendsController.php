@@ -148,6 +148,49 @@ class FriendsController extends Controller
         return $myData;
     }
 
+
+    public function removefriend(Request $request) {
+        
+        $user_id = $request->input('user_id');
+        $friend_id = $request->input('friend_id');
+      
+        $Like = Friends::where([['user_id', '=', $user_id], 
+                        ['friend_id', '=', $friend_id]])->delete();
+        
+
+        $response = [
+            '0' => "Deleted",
+        ];
+
+        return response($response, 201);
+    }
+
+
+    public function addfriend(Request $request) {
+
+        $fields = $request->validate([
+            'user_id' => 'required|integer',
+            'friend_id' => 'required|integer',
+        ]);
+
+        $Like = Friends::where([['user_id', '=', $fields['user_id']], 
+        ['friend_id', '=', $fields['friend_id']]])->first();
+
+        if($Like === null){
+            $Like = Friends::create([
+                'user_id' => $fields['user_id'],
+                'friend_id' => $fields['friend_id'],
+            ]);
+            $Like->save();
+            $response = [
+                '0' => $Like,
+            ];
+    
+            return response($response, 201);
+        }
+    }
+
+
     public function insertfof(Request $request)
     {
         if (($handle = fopen ( public_path () . '/FOF_final_without_duplicates.csv', 'r' )) !== FALSE) {

@@ -311,10 +311,15 @@ class UserController extends Controller
         //$candidates = Media::all();
          $candidates = DB::table('users')     
             ->select('users.id', 'username', 'users.name as fullname', 'email', 'user_dp', 
-                DB::raw("IFNULL(friends.user_id, 0) as following"))
+                DB::raw("IFNULL(friends.user_id, 0) as following"), 
+                DB::raw("IFNULL(friend_requests.requested_user_id, 0) AS req"))
             ->leftJoin('friends',function($join) use($id) {
                 $join->on('users.id','=','friends.friend_id')
                 ->where('friends.user_id','=',$id);
+            })
+            ->leftJoin('friend_requests',function($join) use($id) {
+                $join->on('users.id','=','friend_requests.requested_user_id')
+                ->where('friend_requests.user_id','=',$id);
             })
             ->Where('users.name','like',$input_final)
             ->orwhere('users.username','like',$input_final)
