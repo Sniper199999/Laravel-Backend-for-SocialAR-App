@@ -105,9 +105,6 @@ class UnlockedController extends Controller
             ]);
             $Like->save();
         }
-
-        
-
         $response = [
             '0' => $Like,
         ];

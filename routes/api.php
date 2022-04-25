@@ -49,8 +49,8 @@ Route::get('/unlike', [LikesController::class, 'unlike']);
 Route::post('/mediaunlocked', [UnlockedController::class, 'mediaunlocked']);
 Route::get('/removefriend', [FriendsController::class, 'removefriend']);
 Route::post('/addfriend', [FriendsController::class, 'addfriend']);
-Route::get('/sendfriendreq', [FriendRequestController::class, 'sendfriendreq']);
-Route::post('/declinefriendreq', [FriendRequestController::class, 'declinefriendreq']);
+Route::post('/sendfriendreq', [FriendRequestController::class, 'sendfriendreq']);
+Route::get('/declinefriendreq', [FriendRequestController::class, 'declinefriendreq']);
 
 
 //insert main data

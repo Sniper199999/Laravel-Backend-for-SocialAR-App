@@ -323,16 +323,19 @@ class MediaController extends Controller
 
     public function getMediaa(Request $request) {
         $id = $request->input('id');
-        $friend_id = 112;
+        $friend_id = $request->input('friend_id');
         //$candidates = Media::all();
          $candidates = Media::query()
-            ->select(DB::raw("IFNULL(unlockeds.friend_id, 112) as friend_id"), DB::raw("IFNULL(unlockeds.media_unlocked, 0) as media_unlocked"), 'media.*')
-            ->leftJoin('unlockeds',function($join) {
+            ->select(DB::raw("IFNULL(unlockeds.media_unlocked, 0) as media_unlocked"), 'media.*', 'users.username', 'users.user_dp')
+            ->leftJoin('unlockeds',function($join) use($friend_id) {
                 $join->on('unlockeds.user_id','=','media.user_id')
                 ->on('media.id','=','unlockeds.media_id')
-                ->where('unlockeds.friend_id','=',112);
+                ->where('unlockeds.friend_id','=', $friend_id);
             })
-            ->where('media.user_id','=',26)
+            ->leftJoin('users',function($join) {
+                $join->on('users.id','=','media.user_id');
+            })
+            ->where('media.user_id','=',$id)
             ->orderBy('media.created_at','asc')
             ->orderBy('media.id','asc')
             ->get();
@@ -350,7 +353,7 @@ class MediaController extends Controller
         //$candidates = Media::all();
         $candidates = Media::query()
             ->select('users.user_dp', 'users.username', DB::raw("users.name as fullname") ,DB::raw("IFNULL(unlockeds.friend_id, '$id') as friend_id"),
-                 DB::raw("IFNULL(unlockeds.media_unlocked, 0) as media_unlocked"), DB::raw("IFNULL(likes.user_id, 0) AS hasuserliked"),
+                 DB::raw("IFNULL(unlockeds.friend_id, 0) as media_unlocked"), DB::raw("IFNULL(likes.user_id, 0) AS hasuserliked"),
                  'media.*')
             ->leftJoin('unlockeds', function($join) use ($id) {
                 $join->on('unlockeds.user_id','=','media.user_id')
