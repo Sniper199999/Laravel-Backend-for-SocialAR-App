@@ -228,7 +228,8 @@ class MediaController extends Controller
             'media' => $user_media,
             'image' => $uploadedImageResponse,
         ];
-
+ 
+        
         return response($response, 201);
     }
 
