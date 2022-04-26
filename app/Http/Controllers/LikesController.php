@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Likes;
 use Illuminate\Http\Request;
+use App\Models\Media;
 
 class LikesController extends Controller
 {
@@ -96,6 +97,10 @@ class LikesController extends Controller
         ]);
         $Like->save();
 
+        $updated = Media::where('id', $fields['media_id'])
+                        ->increment('total_likes');
+                      
+
         $response = [
             '0' => $Like,
         ];
@@ -111,6 +116,8 @@ class LikesController extends Controller
         $Like = Likes::where([['user_id', '=', $user_id], 
                         ['media_id', '=', $media_id]])->delete();
         
+        $updated = Media::where('id', $media_id)
+        ->decrement('total_likes');
 
         $response = [
             '0' => "Deleted",

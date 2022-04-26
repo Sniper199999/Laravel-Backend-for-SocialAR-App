@@ -51,6 +51,7 @@ Route::get('/removefriend', [FriendsController::class, 'removefriend']);
 Route::post('/addfriend', [FriendsController::class, 'addfriend']);
 Route::post('/sendfriendreq', [FriendRequestController::class, 'sendfriendreq']);
 Route::get('/declinefriendreq', [FriendRequestController::class, 'declinefriendreq']);
+Route::post('/likecount', [MediaController::class, 'likecount']);
 
 
 //insert main data

@@ -6,6 +6,7 @@ use App\Models\Friends;
 use Illuminate\Http\Request;
 use App\Models\User;
 use \Illuminate\Support\Facades\DB;
+use App\Models\Friend_request;
 
 class FriendsController extends Controller
 {
@@ -173,18 +174,23 @@ class FriendsController extends Controller
             'friend_id' => 'required|integer',
         ]);
 
-        $Like = Friends::where([['user_id', '=', $fields['user_id']], 
-        ['friend_id', '=', $fields['friend_id']]])->first();
+        $Like = Friends::where([['user_id', '=', $fields['friend_id']], 
+        ['friend_id', '=', $fields['user_id']]])->first();
+
+        $like2 = Friend_request::where([['user_id', '=', $fields['friend_id']], 
+                        ['requested_user_id', '=', $fields['user_id']]])->delete();
 
         if($Like === null){
             $Like = Friends::create([
-                'user_id' => $fields['user_id'],
-                'friend_id' => $fields['friend_id'],
+                'user_id' => $fields['friend_id'],
+                'friend_id' => $fields['user_id'],
             ]);
             $Like->save();
             $response = [
                 '0' => $Like,
             ];
+        
+            
     
             return response($response, 201);
         }

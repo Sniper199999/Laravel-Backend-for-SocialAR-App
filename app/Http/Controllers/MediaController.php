@@ -287,18 +287,18 @@ class MediaController extends Controller
         
       //  $data2[0] =  [, , ];
         $data2[0] = [
-            'totalpost' => current($totalpost[0]),
-            'followers' => current($followers[0]),
+            'totalpost' => current($totalpost[0]), 
+            'followers' => current($followers[0]), 
             'following' => current($following[0]),
         ];
-            
-        
+       
+        $zz = json_encode($data2[0], JSON_FORCE_OBJECT);
 
         // $current_date_time = Carbon::now()->toIso8601String();
         // foreach($candidates as $i){
         //      $i->current_time = $current_date_time;
         // }
-        return $data2;
+        return $zz;
     }
 
 
@@ -326,7 +326,7 @@ class MediaController extends Controller
         $friend_id = $request->input('friend_id');
         //$candidates = Media::all();
          $candidates = Media::query()
-            ->select(DB::raw("IFNULL(unlockeds.media_unlocked, 0) as media_unlocked"), 'media.*', 'users.username', 'users.user_dp')
+            ->select(DB::raw("IFNULL(unlockeds.friend_id, 0) as media_unlocked"), 'media.*', 'users.username', 'users.user_dp')
             ->leftJoin('unlockeds',function($join) use($friend_id) {
                 $join->on('unlockeds.user_id','=','media.user_id')
                 ->on('media.id','=','unlockeds.media_id')
@@ -392,6 +392,16 @@ class MediaController extends Controller
             ->where('user_id','=',$id)
             ->get();
         return $candidates;
+    }
+
+    public function likecount(Request $request){
+        $fields = $request->validate([
+            'id' => 'required|integer',
+            'caption' => 'required|string',
+            
+        ]);
+        $updated = Media::where('id', $fields['id'])->update(['caption' => $fields['caption']]);
+        return "DOne";
     }
 
     public function insertmediadata(Request $request)

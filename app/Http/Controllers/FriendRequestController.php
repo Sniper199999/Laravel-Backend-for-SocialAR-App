@@ -127,6 +127,7 @@ class FriendRequestController extends Controller
         $user_id = $request->input('user_id');
         $requested_user_id = $request->input('requested_user_id');
       
+        
         $Like = Friend_request::where([['user_id', '=', $user_id], 
                         ['requested_user_id', '=', $requested_user_id]])->delete();
         
