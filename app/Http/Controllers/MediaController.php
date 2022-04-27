@@ -229,7 +229,7 @@ class MediaController extends Controller
             'image' => $uploadedImageResponse,
         ];
  
-        
+
         return response($response, 201);
     }
 
@@ -305,14 +305,19 @@ class MediaController extends Controller
 
     public function getmediaofuser(Request $request) {
         $id = $request->input('id');
-        $friend_id = 112;
+        $friend_id = $request->input('friend_id');
         //$candidates = Media::all();
         //$party = User::find($id);
         //$candidates = $party->medias; // Returns a Laravel Collection User.php
+        
          $candidates = Media::query()
-            ->select('media.*', 'users.username', 'users.user_dp')
+            ->select('media.*', 'users.username', 'users.user_dp', DB::raw("IFNULL(likes.user_id, 0) AS liked"))
             ->join('users','users.id','=','media.user_id')
-            ->where('media.user_id','=',$id)
+            ->leftJoin('likes',function($join) use($id) {
+                $join->on('media.id','=','likes.media_id')
+                ->where('likes.user_id','=', $id);
+            })
+            ->where('media.user_id','=',$friend_id)
             ->get();
 
         $current_date_time = Carbon::now()->toIso8601String();
@@ -327,7 +332,7 @@ class MediaController extends Controller
         $friend_id = $request->input('friend_id');
         //$candidates = Media::all();
          $candidates = Media::query()
-            ->select(DB::raw("IFNULL(unlockeds.friend_id, 0) as media_unlocked"), 'media.*', 'users.username', 'users.user_dp')
+            ->select(DB::raw("IFNULL(unlockeds.friend_id, 0) as media_unlocked"), 'media.*', 'users.username', 'users.user_dp', DB::raw("IFNULL(likes.user_id, 0) AS liked"))
             ->leftJoin('unlockeds',function($join) use($friend_id) {
                 $join->on('unlockeds.user_id','=','media.user_id')
                 ->on('media.id','=','unlockeds.media_id')
@@ -335,6 +340,10 @@ class MediaController extends Controller
             })
             ->leftJoin('users',function($join) {
                 $join->on('users.id','=','media.user_id');
+            })
+            ->leftJoin('likes',function($join) use($friend_id) {
+                $join->on('media.id','=','likes.media_id')
+                ->where('likes.user_id','=', $friend_id);
             })
             ->where('media.user_id','=',$id)
             ->orderBy('media.created_at','asc')
